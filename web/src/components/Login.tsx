@@ -1,7 +1,11 @@
 import test from '../assets/test.png'
 import { Eye } from 'phosphor-react'
 
+import {useNavigate} from 'react-router-dom' 
+
 export function Login(){
+    const navigate = useNavigate()
+
     return (
         <section className="bg-background min-h-screen flex items-center justify-center">
             <div className="bg-gray-100 flex rounded-2xl shadow-lg max-w-3xl p-5 items-center">
@@ -33,7 +37,10 @@ export function Login(){
                                 color="gray"
                             />
                         </div>
-                        <button className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300">
+                        <button 
+                            onClick={() => navigate('/test')}
+                            className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300"
+                        >
                             Login
                         </button>
                     </form>
