@@ -22,3 +22,7 @@ npm i @fastify/cors
 npx prisma db seed
     - pra rodar o seed pra popular o db
         - depois de criado o arquivo seed.ts
+
+npm i zod
+
+npm i dayjs
