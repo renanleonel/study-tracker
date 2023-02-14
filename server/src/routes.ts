@@ -55,6 +55,22 @@ export async function appRoutes(app: FastifyInstance){
         return users
     })
 
+    app.get('/users/:id', async (request) => { 
+        const getUserParams = z.object({
+            id: z.number()
+        })
+
+        const {id} = getUserParams.parse(request.params)
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: id
+            }
+        })
+
+        return user
+    })
+
     app.post('/users', async (request) => {
         const userBody = z.object({
             email: z.string(),
@@ -68,6 +84,44 @@ export async function appRoutes(app: FastifyInstance){
             data: {
                 email,
                 password,
+            }
+        })
+    })
+
+    app.put('/users/:id', async (request) => {
+        const updateUserParams = z.object({
+            id: z.number()
+        })
+
+        const updateUserBody = z.object({
+            email: z.string(),
+            password: z.string()
+        })
+
+        const {id} = updateUserParams.parse(request.params)
+        const {email, password} = updateUserBody.parse(request.body)
+
+        await prisma.user.update({
+            where: {
+                id: id
+            },
+            data: {
+                email,
+                password
+            }
+        })
+    })
+
+    app.delete('/users/:id', async (request) => {
+        const deleteUserParams = z.object({
+            id: z.number()
+        })
+
+        const {id} = deleteUserParams.parse(request.params)
+
+        await prisma.user.delete({
+            where: {   
+                id: id
             }
         })
     })
