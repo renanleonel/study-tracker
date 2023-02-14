@@ -62,3 +62,12 @@ model DayHabit {
   @@unique([day_id, habit_id])
   @@map("day_habits")
 }
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  created_at DateTime @default(now())
+
+  @@map("users")
+}

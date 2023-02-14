@@ -33,5 +33,43 @@ export async function appRoutes(app: FastifyInstance){
             }
         })
     })
+
+    app.get('/day', async (request) => {
+        const getDayParams = z.object({
+            date: z.coerce.date()
+        })
+
+        //busca do parâmetro da req no cabeçalho
+        const {date} = getDayParams.parse(request.query)
+
+        //resgatar todos os hábitos possíveis de serem completados
+        //resgatar todos os hábitos que foram completados
+
+        const possibleHabits = await prisma.habit.findMany({
+            
+        })
+    })
+
+    app.get('/users', async (request) => {
+        const users = await prisma.user.findMany()
+        return users
+    })
+
+    app.post('/users', async (request) => {
+        const userBody = z.object({
+            email: z.string(),
+            password: z.string()
+        })
+
+        const {email, password} = userBody.parse(request.body)
+        const today = dayjs().startOf('day').toDate()
+
+        await prisma.user.create({
+            data: {
+                email,
+                password,
+            }
+        })
+    })
 }
 
