@@ -2,6 +2,8 @@ import{ FastifyInstance } from "fastify"
 import { prisma } from "./lib/prisma"
 import {z} from "zod"
 import dayjs from "dayjs"
+// import { parseUserDto } from "./dto/indexDto"
+import bcrypt from "bcrypt"
 
 export async function appRoutes(app: FastifyInstance){
     app.post('/habits', async (request) => {
@@ -57,7 +59,7 @@ export async function appRoutes(app: FastifyInstance){
 
     app.get('/users/:id', async (request) => { 
         const getUserParams = z.object({
-            id: z.number()
+            id: z.string()
         })
 
         const {id} = getUserParams.parse(request.params)
@@ -71,59 +73,77 @@ export async function appRoutes(app: FastifyInstance){
         return user
     })
 
-    app.post('/users', async (request) => {
+    app.post('/users/signin', async (request, response) => {
         const userBody = z.object({
             email: z.string(),
             password: z.string()
         })
 
-        const {email, password} = userBody.parse(request.body)
-        const today = dayjs().startOf('day').toDate()
+        try{
+            const {email, password} = userBody.parse(request.body)
 
-        await prisma.user.create({
-            data: {
-                email,
-                password,
+            if(!email || !password) {
+                return response.status(400).send('Email e senha são obrigatórios')
             }
-        })
+
+            const userExists = await prisma.user.findUnique({
+                where: {
+                    email: email
+                }
+            })
+
+            if (userExists) {
+                return response.status(400).send('Usuário já cadastrado')
+            }
+
+            if (password.length < 5) {
+                return response.status(400).send('A senha deve ter no mínimo 5 caracteres')
+            }
+
+            //hashing password
+            const salt = await bcrypt.genSalt()
+            const hashedPassword = await bcrypt.hash(password, salt)
+
+            await prisma.user.create({
+                data: {
+                    email: email,
+                    password: hashedPassword,
+                }
+            })
+
+        } catch{
+            return response.status(400).send('Erro ao cadastrar usuário')
+        }
+
+        
     })
 
-    app.put('/users/:id', async (request) => {
-        const updateUserParams = z.object({
-            id: z.number()
-        })
-
-        const updateUserBody = z.object({
+    app.post('/users/login', async (request, response) => {
+        const loginBody = z.object({
             email: z.string(),
             password: z.string()
         })
 
-        const {id} = updateUserParams.parse(request.params)
-        const {email, password} = updateUserBody.parse(request.body)
+        const {email, password} = loginBody.parse(request.body)
 
-        await prisma.user.update({
+        if (!email || !password) {
+            return response.status(400).send('Email e senha são obrigatórios')
+        }
+ 
+        const user = await prisma.user.findUnique({
             where: {
-                id: id
-            },
-            data: {
-                email,
-                password
+                email: email,
             }
         })
-    })
 
-    app.delete('/users/:id', async (request) => {
-        const deleteUserParams = z.object({
-            id: z.number()
-        })
-
-        const {id} = deleteUserParams.parse(request.params)
-
-        await prisma.user.delete({
-            where: {   
-                id: id
+        try{
+            if (email === user?.email && await bcrypt.compare(password, user?.password)) {
+                return response.status(200).send({data: user, message: 'Usuário logado com sucesso'})
             }
-        })
+        } catch{
+            return response.status(200).send('Usuário ou senha inválidos')
+        }
+
     })
 }
 
