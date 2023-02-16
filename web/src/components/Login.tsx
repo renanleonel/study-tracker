@@ -2,9 +2,34 @@ import test from '../assets/test.png'
 import { Eye } from 'phosphor-react'
 
 import {useNavigate} from 'react-router-dom' 
+import { FormEvent, useState } from 'react'
+import { api } from '../lib/axios'
 
 export function Login(){
     const navigate = useNavigate()
+
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+
+    async function handleLogin(e: FormEvent) {
+        e.preventDefault();
+
+        try {
+          const response = await api.post('/users/login', {
+            email,
+            password,
+          });
+
+          if (response.status === 200) {
+            navigate('/test');
+          } else {
+            // logica de login invalido
+            console.log('error')
+          }
+        } catch (error) {
+            console.log(error)
+        }
+      }
 
     return (
         <section className="bg-background min-h-screen flex items-center justify-center">
@@ -23,6 +48,7 @@ export function Login(){
                             type="email" 
                             name="email" 
                             placeholder="Email"
+                            onChange={e => setEmail(e.target.value)}
                         />
                         <div className="relative">
                             <input 
@@ -30,6 +56,7 @@ export function Login(){
                                 type="password" 
                                 name="password" 
                                 placeholder="Senha"
+                                onChange={e => setPassword(e.target.value)}
                             />
                             <Eye 
                                 className='absolute top-1/2 right-3 -translate-y-1/2' 
@@ -38,7 +65,7 @@ export function Login(){
                             />
                         </div>
                         <button 
-                            onClick={() => navigate('/test')}
+                            onClick={handleLogin}
                             className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300"
                         >
                             Login

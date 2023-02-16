@@ -140,10 +140,12 @@ export async function appRoutes(app: FastifyInstance){
             if (email === user?.email && await bcrypt.compare(password, user?.password)) {
                 return response.status(200).send({data: user, message: 'Usuário logado com sucesso'})
             }
+            else{
+                return response.status(400).send('Usuário ou senha inválidos')
+            }
         } catch{
-            return response.status(200).send('Usuário ou senha inválidos')
+            return response.status(400).send('Usuário ou senha inválidos')
         }
-
     })
 }
 
