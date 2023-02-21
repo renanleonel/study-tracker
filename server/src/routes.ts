@@ -10,16 +10,18 @@ export async function appRoutes(app: FastifyInstance){
             title: z.string(),
             weekDays: z.array(
                 z.number().min(0).max(6) // de segunda a domingo
-            )
+            ),
+            userId: z.string().uuid()
         })
 
-        const {title, weekDays} = createHabitBody.parse(request.body)
+        const {title, weekDays, userId} = createHabitBody.parse(request.body)
 
         const today = dayjs().startOf('day').toDate()
 
         await prisma.habit.create({
             data:{
                 title,
+                user_id: userId,
                 created_at: today,
                 weekDays: {
                     create: weekDays.map(weekDay => {  
@@ -31,6 +33,55 @@ export async function appRoutes(app: FastifyInstance){
             }
         })
     }),
+
+    app.get('/day', async(request) => {
+        const getDayParams = z.object({
+            date: z.coerce.date(),
+            userId: z.coerce.string().uuid()
+        })
+
+        const {date, userId} = getDayParams.parse(request.query)
+
+        const parsedDate = dayjs(date).startOf('day')
+        const weekDay = parsedDate.get('day')
+
+        //resgatar todos os hábitos possíveis de serem completados
+        //resgatar todos os hábitos que foram completados
+        const possibleHabits = await prisma.habit.findMany({
+            where: {
+                created_at: {
+                    lte: date,
+                },
+                user_id: userId,
+                weekDays: {
+                    some: {
+                        week_day: weekDay,
+                    }
+                }
+            }
+        })
+
+        //resgata o dia específico com suas props
+        const day = await prisma.day.findUnique({
+            where: {
+                date: parsedDate.toDate(),
+            },
+            //resgata os hábitos completados no dia
+            include:{
+                dayHabits: true
+            }
+        })
+
+        //retorna o id dos hábitos completados no dia específico
+        const completedHabits = day?.dayHabits.map(dayHabit => {
+            return dayHabit.habit_id
+        }) ?? []
+
+        return {
+            possibleHabits,
+            completedHabits
+        }
+    })
 
     app.delete('/habits/:id', async (request) => {
         const deleteHabitParams = z.object({
@@ -60,55 +111,6 @@ export async function appRoutes(app: FastifyInstance){
                 id: id
             }
         })
-    })
-
-    app.get('/day', async(request) => {
-        const getDayParams = z.object({
-            date: z.coerce.date()
-        })
-
-        //busca do parâmetro da req no cabeçalho
-        const {date} = getDayParams.parse(request.query)
-
-        const parsedDate = dayjs(date).startOf('day')
-        const weekDay = parsedDate.get('day')
-
-        //resgatar todos os hábitos possíveis de serem completados
-        //resgatar todos os hábitos que foram completados
-        const possibleHabits = await prisma.habit.findMany({
-            where: {
-                created_at: {
-                    lte: date,
-                },
-
-                weekDays: {
-                    some: {
-                        week_day: weekDay,
-                    }
-                }
-            }
-        })
-
-        //resgata o dia específico com suas props
-        const day = await prisma.day.findUnique({
-            where: {
-                date: parsedDate.toDate(),
-            },
-            //resgata os hábitos completados no dia
-            include:{
-                dayHabits: true
-            }
-        })
-
-        //retorna o id dos hábitos completados no dia específico
-        const completedHabits = day?.dayHabits.map(dayHabit => {
-            return dayHabit.habit_id
-        }) ?? []
-
-        return {
-            possibleHabits,
-            completedHabits
-        }
     })
 
     app.patch('/habits/:id/toggle', async (request) => {

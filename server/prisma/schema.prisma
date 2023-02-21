@@ -18,7 +18,10 @@ model Habit {
   dayHabits DayHabit[]
   weekDays  HabitWeekDays[]
 
-  //renomeando a tabela
+  // nova relação com a tabela User
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
+
   @@map("habits")
 }
 
@@ -67,6 +70,7 @@ model User {
   email      String   @unique
   password   String
   created_at DateTime @default(now())
+  Habit      Habit[]
 
   @@map("users")
 }
