@@ -1,6 +1,6 @@
 import React from 'react'
 import { Header } from './Header'
-import { Table } from './Table'
+import { SummaryTable } from './SummaryTable'
 
 export function Home() {
   return (
@@ -9,7 +9,7 @@ export function Home() {
         {/* em dispositivos pequenos fica com 100%, em maiores fixa no máximo em 64rem */}
         {/* tailwind tem todas as medidas * 4*/}
         <Header/>
-        <Table/>
+        <SummaryTable/>
       </div>
     </div>
   )

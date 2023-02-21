@@ -66,7 +66,7 @@ export function Login(){
                         </div>
                         <button 
                             // onClick={handleLogin}
-                            onClick={() => navigate('/test')}
+                            onClick={() => navigate('/home')}
                             className="bg-[#002D74] rounded-xl text-white py-2 hover:scale-105 duration-300"
                         >
                             Login

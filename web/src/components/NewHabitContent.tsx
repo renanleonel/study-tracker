@@ -40,8 +40,7 @@ export function NewHabitContent() {
     }
 
     return(
-        // <form onSubmit={createNewHabit} className="w-full flex flex-col mt-6">
-        <form className="w-full flex flex-col mt-6">
+        <form onSubmit={createNewHabit} className="w-full flex flex-col mt-6">
             <label htmlFor="title" className="font-semibold leading-tight text-white">
                 Qual seu comprometimento?
             </label>
@@ -53,7 +52,7 @@ export function NewHabitContent() {
                 autoFocus
                 value={title}
                 onChange={event => setTitle(event.target.value)}
-                className="p-4 rounded-lg mt-3 bg-zinc-800 text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-600 focus:ring-offset-2 focus:ring-offset-zinc-900"
+                className="p-4 rounded-lg mt-3 bg-zinc-800 text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-zinc-900"
             />
 
             <label htmlFor="" className="font-semibold leading-tight mt-4 text-white">

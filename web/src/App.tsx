@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-
+import './lib/dayjs'
 import { Login } from './components/Login'
 import { Home } from './components/Home'
 import './styles/global.css'
