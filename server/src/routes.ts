@@ -32,6 +32,36 @@ export async function appRoutes(app: FastifyInstance){
         })
     }),
 
+    app.delete('/habits/:id', async (request) => {
+        const deleteHabitParams = z.object({
+            id: z.string().uuid()
+        })
+
+        const {id} = deleteHabitParams.parse(request.params)
+
+        await prisma.dayHabit.deleteMany({
+            where: {
+              habit: {
+                id: id
+              }
+            }
+        })
+      
+        await prisma.habitWeekDays.deleteMany({
+            where: {
+              habit: {
+                id: id
+              }
+            }
+        })
+        
+        await prisma.habit.delete({
+            where: {
+                id: id
+            }
+        })
+    })
+
     app.get('/day', async(request) => {
         const getDayParams = z.object({
             date: z.coerce.date()
